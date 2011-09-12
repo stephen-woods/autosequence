@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import javax.persistence.Entity;
@@ -91,7 +92,71 @@ public class EntityIdSetterServiceTest
 
 
 	@Test
-	public void testNoDefinedId()
+	public void testSetId_EntityB1()
+	{
+		long id = 234L;
+
+		EntityB1 entity = new EntityB1();
+		assertEquals(-1L, entity.getId());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getId());
+	}
+
+
+	@Test
+	public void testSetId_EntityB2()
+	{
+		long id = 4124L;
+
+		EntityB2 entity = new EntityB2();
+		assertEquals(-1L, entity.getIdentity());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getIdentity());
+	}
+
+
+	@Test
+	public void testSetId_EntityB1_Cached1()
+	{
+		long id = 234L;
+
+		EntityB1 entity = new EntityB1();
+		assertEquals(-1L, entity.getId());
+
+		Field idField = entityIdSetterService.getIdFields().get(EntityB1.class);
+		assertNull(idField);
+		entityIdSetterService.setId(entity, id);
+
+		idField = entityIdSetterService.getIdFields().get(EntityB1.class);
+		assertNotNull(idField);
+		assertEquals("id", idField.getName());
+	}
+
+
+	@Test
+	public void testSetId_EntityB2_Cached1()
+	{
+		long id = 234L;
+
+		EntityB2 entity = new EntityB2();
+		assertEquals(-1L, entity.getIdentity());
+
+		Field idField = entityIdSetterService.getIdFields().get(EntityB2.class);
+		assertNull(idField);
+		entityIdSetterService.setId(entity, id);
+
+		idField = entityIdSetterService.getIdFields().get(EntityB2.class);
+		assertNotNull(idField);
+		assertEquals("identity", idField.getName());
+	}
+
+
+	@Test
+	public void testSetId_NoIdEntity()
 	{
 		NoIdEntityA entity = new NoIdEntityA();
 		try
@@ -109,7 +174,7 @@ public class EntityIdSetterServiceTest
 	@Entity
 	public class EntityA1
 	{
-		public long id = -1;
+		private long id = -1;
 
 
 		@Id
@@ -128,7 +193,7 @@ public class EntityIdSetterServiceTest
 	@Entity
 	public class EntityA2
 	{
-		public long identity = -1;
+		private long identity = -1;
 
 
 		@Id
@@ -146,7 +211,7 @@ public class EntityIdSetterServiceTest
 
 	public class NoIdEntityA
 	{
-		public long id = -1;
+		private long id = -1;
 
 
 		public long getId()
@@ -158,6 +223,44 @@ public class EntityIdSetterServiceTest
 		public void setId(long id)
 		{
 			this.id = id;
+		}
+	}
+
+	@Entity
+	public class EntityB1
+	{
+		@Id
+		private long id = -1;
+
+
+		public long getId()
+		{
+			return id;
+		}
+
+
+		public void setId(long id)
+		{
+			this.id = id;
+		}
+	}
+
+	@Entity
+	public class EntityB2
+	{
+		@Id
+		private long identity = -1;
+
+
+		public long getIdentity()
+		{
+			return identity;
+		}
+
+
+		public void setIdentity(long identity)
+		{
+			this.identity = identity;
 		}
 	}
 }

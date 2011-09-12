@@ -18,17 +18,18 @@ public class EntityIdSetterService
 	protected HashMap<Class<?>, Field> idFields = new HashMap<Class<?>, Field>();
 
 
-	public void setId(	Object entity,
+	public void setId(	final Object entity,
 						long id)
 	{
-		Method idSetterMethod = idSetterMethods.get(entity.getClass());
+		final Class<?> clazz = entity.getClass();
+		Method idSetterMethod = idSetterMethods.get(clazz);
 		if (idSetterMethod != null)
 		{
 			// We know what the setter method is already. Just call it.
 			return;
 		}
 
-		Field idField = idFields.get(entity.getClass());
+		Field idField = idFields.get(clazz);
 		if (idField != null)
 		{
 			// We know what the id field is already. Just assign a new value to
@@ -42,15 +43,17 @@ public class EntityIdSetterService
 			// We now know what the setter method is. Call it and cache it for
 			// later use.
 			invokeSetter(idSetterMethod, entity, id);
-			idSetterMethods.put(entity.getClass(), idSetterMethod);
+			idSetterMethods.put(clazz, idSetterMethod);
 			return;
 		}
 
-		idField = findIdField(entity.getClass());
+		idField = findIdField(entity);
 		if (idField != null)
 		{
 			// We now know what the id field is. Assign a new value to
 			// it, and cache it for later use.
+			assignField(idField, entity, id);
+			idFields.put(clazz, idField);
 			return;
 		}
 
@@ -62,6 +65,17 @@ public class EntityIdSetterService
 	private Field findIdField(Object entity)
 	{
 		Field idField = null;
+
+		for (Field field : entity.getClass().getDeclaredFields())
+		{
+			Id id = field.getAnnotation(Id.class);
+			if (id != null)
+			{
+				idField = field;
+				idField.setAccessible(true);
+				break;
+			}
+		}
 		return idField;
 	}
 
@@ -77,6 +91,7 @@ public class EntityIdSetterService
 			if (id != null)
 			{
 				getterMethod = method;
+				method.setAccessible(true);
 				break;
 			}
 		}
@@ -125,6 +140,29 @@ public class EntityIdSetterService
 		catch (IllegalAccessException e)
 		{
 			String error = "Error occurred when calling setter for @Id annotated getter method:" + entity.getClass().getName() + "." + idSetterMethod.getName();
+			log.error(error);
+			throw new RuntimeException(error, e);
+		}
+	}
+
+
+	private void assignField(	Field idField,
+								Object entity,
+								long id)
+	{
+		try
+		{
+			idField.setLong(entity, id);
+		}
+		catch (IllegalArgumentException e)
+		{
+			String error = "Error occurred when assigning @Id annotated field method:" + entity.getClass().getName() + "." + idField.getName();
+			log.error(error);
+			throw new RuntimeException(error, e);
+		}
+		catch (IllegalAccessException e)
+		{
+			String error = "Error occurred when assigning @Id annotated field method:" + entity.getClass().getName() + "." + idField.getName();
 			log.error(error);
 			throw new RuntimeException(error, e);
 		}
