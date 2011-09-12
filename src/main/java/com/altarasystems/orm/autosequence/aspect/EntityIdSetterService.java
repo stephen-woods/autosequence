@@ -65,7 +65,7 @@ public class EntityIdSetterService
 	}
 
 
-	private Field findIdField(Object entity)
+	private Field findIdField(final Object entity)
 	{
 		Field idField = null;
 
@@ -92,7 +92,7 @@ public class EntityIdSetterService
 	}
 
 
-	private Method findIdSetterMethod(Object entity)
+	private Method findIdSetterMethod(final Object entity)
 	{
 		Method idSetterMethod = null;
 
@@ -160,8 +160,8 @@ public class EntityIdSetterService
 	}
 
 
-	private void invokeSetter(	Method idSetterMethod,
-								Object entity,
+	private void invokeSetter(	final Method idSetterMethod,
+								final Object entity,
 								long id)
 	{
 		try
@@ -183,8 +183,8 @@ public class EntityIdSetterService
 	}
 
 
-	private void assignField(	Field idField,
-								Object entity,
+	private void assignField(	final Field idField,
+								final Object entity,
 								long id)
 	{
 		try
