@@ -1,6 +1,7 @@
 apply plugin: 'eclipse'
 apply plugin: 'java'
 apply from: 'upload.gradle'
+apply from: 'aspectj.gradle'
 
 artifactId = 'autosequence'
 group = 'com.altarasystems.orm'
@@ -22,4 +23,10 @@ dependencies {
 	compile("org.hibernate:hibernate-core:3.6.6.Final")
 	testCompile("junit:junit:4.8.2")
 	testCompile("org.mockito:mockito-core:1.8.5")
+}
+
+
+jar
+{
+	exclude 'com/altarasystems/orm/autosequence/aspect'
 }

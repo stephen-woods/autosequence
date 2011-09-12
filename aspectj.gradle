@@ -1,0 +1,44 @@
+apply plugin: 'eclipse'
+
+configurations {
+	ajc
+	aspects
+	ajInpath
+}
+
+dependencies {
+	ajc("org.aspectj:aspectjtools:1.6.10")
+	ajc("org.aspectj:aspectjweaver:1.6.10")
+	ajc("org.aspectj:aspectjrt:1.6.10")
+	compile("org.aspectj:aspectjrt:1.6.10")
+	runtime("org.aspectj:aspectjrt:1.6.10")
+}
+
+task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
+	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	ant.iajc(source:sourceCompatibility,
+			target:targetCompatibility,
+			destDir:sourceSets.main.classesDir.absolutePath,
+			classpath: configurations.compile.asPath,
+			aspectPath: configurations.aspects.asPath,
+			inpath: configurations.ajInpath.asPath,
+			debug: true,
+			Xlint: "ignore",
+			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
+				sourceroots {
+					sourceSets.main.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+				}
+			}
+}
+
+eclipseProject {
+	buildCommand ('org.eclipse.ajdt.core.ajbuilder')
+	natures('org.eclipse.ajdt.core.ajbuilder')
+}
+
+
+
+
+
