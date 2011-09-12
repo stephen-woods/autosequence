@@ -1,4 +1,4 @@
-package com.altarasystems.org.autosequence.aspect;
+package com.altarasystems.orm.autosequence.aspect;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
