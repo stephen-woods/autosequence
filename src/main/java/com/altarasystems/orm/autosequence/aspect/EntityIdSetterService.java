@@ -80,26 +80,29 @@ public class EntityIdSetterService
 				break;
 			}
 		}
-		String getterName = getterMethod.getName();
-		if (!getterName.startsWith("get"))
+		if (getterMethod != null)
 		{
-			String error = "@Id annotated method " + entity.getClass().getName() + "." + getterName + " is not a getter method.";
-			log.error(error);
-			throw new RuntimeException(error);
-		}
+			String getterName = getterMethod.getName();
+			if (!getterName.startsWith("get"))
+			{
+				String error = "@Id annotated method " + entity.getClass().getName() + "." + getterName + " is not a getter method.";
+				log.error(error);
+				throw new RuntimeException(error);
+			}
 
-		String fieldName = getterName.substring(3);
-		String setterName = "set" + fieldName;
-		try
-		{
-			idSetterMethod = entity.getClass().getMethod(setterName, long.class);
-		}
-		catch (NoSuchMethodException e)
-		{
-			String error = "@Id annotated getter method " + entity.getClass().getName() + "." + getterName
-					+ " does not have a corresponding setter method or field";
-			log.error(error);
-			throw new RuntimeException(error);
+			String fieldName = getterName.substring(3);
+			String setterName = "set" + fieldName;
+			try
+			{
+				idSetterMethod = entity.getClass().getMethod(setterName, long.class);
+			}
+			catch (NoSuchMethodException e)
+			{
+				String error = "@Id annotated getter method " + entity.getClass().getName() + "." + getterName
+						+ " does not have a corresponding setter method or field";
+				log.error(error);
+				throw new RuntimeException(error);
+			}
 		}
 		return idSetterMethod;
 	}

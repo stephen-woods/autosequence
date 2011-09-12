@@ -3,6 +3,7 @@ package com.altarasystems.org.autosequence.aspect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 
@@ -88,6 +89,23 @@ public class EntityIdSetterServiceTest
 		assertEquals("setIdentity", idSetterMethod.getName());
 	}
 
+
+	@Test
+	public void testNoDefinedId()
+	{
+		NoIdEntityA entity = new NoIdEntityA();
+		try
+		{
+			entityIdSetterService.setId(entity, 2342L);
+			fail("No @Id annotation is defined. Setting an Id should throw an exception");
+		}
+		catch (RuntimeException e)
+		{
+			String message = e.getMessage();
+			assertEquals("Could not determine how to set ID of entity of type " + entity.getClass().getName(), message);
+		}
+	}
+
 	@Entity
 	public class EntityA1
 	{
@@ -123,6 +141,23 @@ public class EntityIdSetterServiceTest
 		public void setIdentity(long identity)
 		{
 			this.identity = identity;
+		}
+	}
+
+	public class NoIdEntityA
+	{
+		public long id = -1;
+
+
+		public long getId()
+		{
+			return id;
+		}
+
+
+		public void setId(long id)
+		{
+			this.id = id;
 		}
 	}
 }
