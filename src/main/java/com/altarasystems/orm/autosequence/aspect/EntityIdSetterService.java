@@ -3,7 +3,10 @@ package com.altarasystems.orm.autosequence.aspect;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.Id;
 
@@ -66,7 +69,16 @@ public class EntityIdSetterService
 	{
 		Field idField = null;
 
-		for (Field field : entity.getClass().getDeclaredFields())
+		ArrayList<Field> allDeclaredFields = new ArrayList<Field>();
+		Class<?> declaringClass = entity.getClass();
+		while (declaringClass != null)
+		{
+			List<Field> fields = Arrays.asList(declaringClass.getDeclaredFields());
+			allDeclaredFields.addAll(fields);
+			declaringClass = declaringClass.getSuperclass();
+		}
+
+		for (Field field : allDeclaredFields)
 		{
 			Id id = field.getAnnotation(Id.class);
 			if (id != null)
@@ -85,7 +97,18 @@ public class EntityIdSetterService
 		Method idSetterMethod = null;
 
 		Method getterMethod = null;
-		for (Method method : entity.getClass().getMethods())
+
+		// Get declared methods, including inherited methods
+		ArrayList<Method> allDeclaredMethods = new ArrayList<Method>();
+		Class<?> declaringClass = entity.getClass();
+		while (declaringClass != null)
+		{
+			List<Method> methods = Arrays.asList(declaringClass.getDeclaredMethods());
+			allDeclaredMethods.addAll(methods);
+			declaringClass = declaringClass.getSuperclass();
+		}
+
+		for (Method method : allDeclaredMethods)
 		{
 			Id id = method.getAnnotation(Id.class);
 			if (id != null)
@@ -95,6 +118,7 @@ public class EntityIdSetterService
 				break;
 			}
 		}
+
 		if (getterMethod != null)
 		{
 			String getterName = getterMethod.getName();
@@ -107,11 +131,24 @@ public class EntityIdSetterService
 
 			String fieldName = getterName.substring(3);
 			String setterName = "set" + fieldName;
-			try
+
+			// Find the setter, looking in super classes if need be
+			declaringClass = entity.getClass();
+			while (declaringClass != null)
 			{
-				idSetterMethod = entity.getClass().getMethod(setterName, long.class);
+				try
+				{
+					idSetterMethod = declaringClass.getDeclaredMethod(setterName, long.class);
+					idSetterMethod.setAccessible(true);
+					break;
+				}
+				catch (NoSuchMethodException e)
+				{
+					declaringClass = declaringClass.getSuperclass();
+				}
 			}
-			catch (NoSuchMethodException e)
+
+			if (idSetterMethod == null)
 			{
 				String error = "@Id annotated getter method " + entity.getClass().getName() + "." + getterName
 						+ " does not have a corresponding setter method or field";
@@ -179,5 +216,4 @@ public class EntityIdSetterService
 	{
 		return idFields;
 	}
-
 }

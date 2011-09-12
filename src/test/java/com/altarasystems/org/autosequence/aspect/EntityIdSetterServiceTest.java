@@ -220,6 +220,62 @@ public class EntityIdSetterServiceTest
 
 
 	@Test
+	public void testSetId_EntityD1()
+	{
+		long id = 234L;
+
+		EntityD1 entity = new EntityD1();
+		assertEquals(-1L, entity.getId());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getId());
+	}
+
+
+	@Test
+	public void testSetId_EntityD2()
+	{
+		long id = 1532L;
+
+		EntityD2 entity = new EntityD2();
+		assertEquals(-1L, entity.getIdentity());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getIdentity());
+	}
+
+
+	@Test
+	public void testSetId_EntityE1()
+	{
+		long id = 234L;
+
+		EntityE1 entity = new EntityE1();
+		assertEquals(-1L, entity.getId());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getId());
+	}
+
+
+	@Test
+	public void testSetId_EntityE2()
+	{
+		long id = 1532L;
+
+		EntityE2 entity = new EntityE2();
+		assertEquals(-1L, entity.getIdentity());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getIdentity());
+	}
+
+
+	@Test
 	public void testSetId_NoIdEntity()
 	{
 		NoIdEntityA entity = new NoIdEntityA();
@@ -377,4 +433,93 @@ public class EntityIdSetterServiceTest
 	{
 
 	}
+
+	@Entity
+	public class EntityD1
+	{
+		private long id = -1;
+
+
+		@Id
+		protected long getId()
+		{
+			return id;
+		}
+
+
+		protected void setId(long id)
+		{
+			this.id = id;
+		}
+	}
+
+	@Entity
+	public class EntityD2
+	{
+		private long identity = -1;
+
+
+		@Id
+		protected long getIdentity()
+		{
+			return identity;
+		}
+
+
+		protected void setIdentity(long identity)
+		{
+			this.identity = identity;
+		}
+	}
+
+	@Entity
+	public abstract class AbstractEntityE1
+	{
+		@Id
+		private long id = -1;
+
+
+		public long getId()
+		{
+			return id;
+		}
+
+
+		public void setId(long id)
+		{
+			this.id = id;
+		}
+	}
+
+	public class EntityE1
+			extends AbstractEntityE1
+	{
+
+	}
+
+	@Entity
+	public abstract class AbstractEntityE2
+	{
+		@Id
+		private long identity = -1;
+
+
+		public long getIdentity()
+		{
+			return identity;
+		}
+
+
+		public void setIdentity(long identity)
+		{
+			this.identity = identity;
+		}
+	}
+
+	@Entity
+	public class EntityE2
+			extends AbstractEntityE2
+	{
+	}
+
 }
