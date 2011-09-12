@@ -64,7 +64,7 @@ public class EntityIdSetterServiceTest
 		EntityA1 entity = new EntityA1();
 		assertEquals(-1L, entity.getId());
 
-		Method idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityA2.class);
+		Method idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityA1.class);
 		assertNull(idSetterMethod);
 		entityIdSetterService.setId(entity, id);
 
@@ -152,6 +152,70 @@ public class EntityIdSetterServiceTest
 		idField = entityIdSetterService.getIdFields().get(EntityB2.class);
 		assertNotNull(idField);
 		assertEquals("identity", idField.getName());
+	}
+
+
+	@Test
+	public void testSetId_EntityC1()
+	{
+		long id = 234L;
+
+		EntityC1 entity = new EntityC1();
+		assertEquals(-1L, entity.getId());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getId());
+	}
+
+
+	@Test
+	public void testSetId_EntityC2()
+	{
+		long id = 1232L;
+
+		EntityC2 entity = new EntityC2();
+		assertEquals(-1L, entity.getIdentity());
+
+		entityIdSetterService.setId(entity, id);
+
+		assertEquals(id, entity.getIdentity());
+	}
+
+
+	@Test
+	public void testSetId_EntityC1_Cached1()
+	{
+		long id = 234L;
+
+		EntityC1 entity = new EntityC1();
+		assertEquals(-1L, entity.getId());
+
+		Method idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityC1.class);
+		assertNull(idSetterMethod);
+		entityIdSetterService.setId(entity, id);
+
+		idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityC1.class);
+		assertNotNull(idSetterMethod);
+		assertEquals("setId", idSetterMethod.getName());
+	}
+
+
+	@Test
+	public void testSetId_EntityC2_Cached1()
+	{
+		long id = 234L;
+
+		EntityC2 entity = new EntityC2();
+		assertEquals(-1L, entity.getIdentity());
+
+		Method idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityC2.class);
+		assertNull(idSetterMethod);
+		entityIdSetterService.setId(entity, id);
+
+		idSetterMethod = entityIdSetterService.getIdSetterMethods().get(EntityC2.class);
+		assertNotNull(idSetterMethod);
+		assertEquals("setIdentity", idSetterMethod.getName());
 	}
 
 
@@ -262,5 +326,55 @@ public class EntityIdSetterServiceTest
 		{
 			this.identity = identity;
 		}
+	}
+
+	@Entity
+	public abstract class AbstractEntityC1
+	{
+		private long id = -1;
+
+
+		@Id
+		public long getId()
+		{
+			return id;
+		}
+
+
+		public void setId(long id)
+		{
+			this.id = id;
+		}
+	}
+
+	public class EntityC1
+			extends AbstractEntityC1
+	{
+
+	}
+
+	@Entity
+	public abstract class AbstractEntityC2
+	{
+		private long identity = -1;
+
+
+		@Id
+		public long getIdentity()
+		{
+			return identity;
+		}
+
+
+		public void setIdentity(long identity)
+		{
+			this.identity = identity;
+		}
+	}
+
+	public class EntityC2
+			extends AbstractEntityC2
+	{
+
 	}
 }
