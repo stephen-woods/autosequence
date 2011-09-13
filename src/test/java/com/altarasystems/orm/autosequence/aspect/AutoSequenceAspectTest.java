@@ -8,22 +8,16 @@ import javax.persistence.Id;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.altarasystems.orm.autosequence.AutoSequence;
-import com.altarasystems.orm.autosequence.AutoSequenceFactory;
 import com.altarasystems.orm.autosequence.AutoSequenceWithinCode;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "/spring/testApplicationContext.xml" })
 public class AutoSequenceAspectTest
 {
-	@Mock
-	public AutoSequenceFactory autoSequenceFactory;
-
-
 	@AutoSequenceWithinCode
 	@Test
 	public void testWithinCode()
