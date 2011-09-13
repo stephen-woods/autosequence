@@ -7,7 +7,6 @@ artifactId = 'autosequence'
 group = 'com.altarasystems.orm'
 version = '0.1-SNAPSHOT'
 
-
 repositories {
 	mavenLocal()
 	mavenRepo  urls: ["${mavenrepo_url}"]
@@ -30,5 +29,5 @@ dependencies {
 
 jar
 {
-	exclude 'com/altarasystems/orm/autosequence/aspect'
+	baseName = 'autosequence'
 }

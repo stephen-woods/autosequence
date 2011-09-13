@@ -10,16 +10,9 @@ task packageSources(type: Jar) {
 	classifier = 'sources'
 }
 
-task packageAspects(type: Jar) {
-	from sourceSets.main.classes
-	include 'com/altarasystems/orm/autosequence/aspect/**/*'
-	classifier = 'aspects'
-}
-
 artifacts {
 	archives packageJavadoc
 	archives packageSources
-	archives packageAspects
 }
 
 uploadArchives {
