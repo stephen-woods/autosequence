@@ -33,9 +33,32 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 			}
 }
 
+task compileTestJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
+	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	ant.iajc(source:sourceCompatibility,
+			target:targetCompatibility,
+			destDir:sourceSets.test.classesDir.absolutePath,
+			classpath: configurations.testCompile.asPath,
+			aspectPath: configurations.aspects.asPath,
+			inpath: configurations.ajInpath.asPath,
+			debug: true,
+			Xlint: "ignore",
+			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
+				sourceroots {
+					sourceSets.main.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+					sourceSets.test.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+				}
+			}
+}
+
 eclipseProject {
 	buildCommand ('org.eclipse.ajdt.core.ajbuilder')
-	natures('org.eclipse.ajdt.core.ajbuilder')
+	natures('org.eclipse.ajdt.core.ajnature')
+	natures('org.eclipse.ajdt.ui.ajnature')
 }
 
 
