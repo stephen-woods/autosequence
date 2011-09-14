@@ -1,0 +1,100 @@
+import org.gradle.plugins.ide.eclipse.model.Library;
+
+apply plugin: 'eclipse'
+
+configurations {
+	ajc
+	aspects {transitive = false}
+	ajInpath {transitive = false}
+}
+
+SPRING_VERSION = "3.0.5.RELEASE"
+dependencies {
+	ajc("org.aspectj:aspectjtools:1.6.10")
+	ajc("org.aspectj:aspectjweaver:1.6.10")
+	ajc("org.aspectj:aspectjrt:1.6.10")
+	compile("org.aspectj:aspectjrt:1.6.10")
+	runtime("org.aspectj:aspectjrt:1.6.10")
+	aspects("com.altarasystems.orm:autosequence:0.1-SNAPSHOT")
+	aspects("org.springframework:org.springframework.aspects:${SPRING_VERSION}")
+}
+
+task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
+	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	ant.iajc(source:sourceCompatibility,
+			target:targetCompatibility,
+			destDir:sourceSets.main.classesDir.absolutePath,
+			classpath: configurations.compile.asPath,
+			aspectPath: configurations.aspects.asPath,
+			inpath: configurations.ajInpath.asPath,
+			debug: true,
+			Xlint: "warning",
+			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
+				sourceroots {
+					sourceSets.main.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+				}
+			}
+}
+
+
+task compileTestJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
+	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	ant.iajc(source:sourceCompatibility,
+			target:targetCompatibility,
+			destDir:sourceSets.test.classesDir.absolutePath,
+			classpath: configurations.testCompile.asPath,
+			aspectPath: configurations.aspects.asPath,
+			inpath: configurations.ajInpath.asPath,
+			debug: true,
+			Xlint: "ignore",
+			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
+				sourceroots {
+					sourceSets.main.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+					sourceSets.test.java.srcDirs.each{
+						pathelement(location:it.absolutePath)
+					}
+				}
+			}
+}
+
+/**
+ * Add the AspectJ natures and builder to the Eclipse project. 
+ */
+eclipseProject {
+	buildCommand ('org.eclipse.ajdt.core.ajbuilder')
+	natures('org.eclipse.ajdt.core.ajnature')
+	natures('org.eclipse.ajdt.ui.ajnature')
+}
+
+/**
+ * Modify any Eclipse classpath entries that are also in the "aspects" or "ajInpath" configuration
+ * to include attributes that the AspectJ Eclipse plugin will use to indicate that these JARs include
+ * aspects that should be woven into the build. This allows unit tests that rely on 
+ * AspectJ woven code to be executed within the Eclipse environment correctly.
+ */
+eclipseClasspath {
+	whenConfigured { classpath ->
+		
+		classpath.entries.each {entry ->
+			configurations.aspects.each {aspectFile ->
+				if (entry.path == aspectFile.getPath())
+				{
+					entry.entryAttributes['org.eclipse.ajdt.aspectpath'] = 'org.eclipse.ajdt.aspectpath'
+				}
+			}
+			configurations.ajInpath.each {aspectFile ->
+				if (entry.path == aspectFile.getPath())
+				{
+					entry.entryAttributes['org.eclipse.ajdt.inpath'] = 'org.eclipse.ajdt.inpath'
+				}
+			}
+		}
+	}
+}
+
+
+
