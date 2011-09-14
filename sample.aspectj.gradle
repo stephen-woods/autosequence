@@ -3,7 +3,7 @@ import org.gradle.plugins.ide.eclipse.model.Library;
 apply plugin: 'eclipse'
 
 configurations {
-	ajc
+	ajc {transitive = false}
 	aspects {transitive = false}
 	ajInpath {transitive = false}
 }
@@ -15,7 +15,7 @@ dependencies {
 	ajc("org.aspectj:aspectjrt:1.6.10")
 	compile("org.aspectj:aspectjrt:1.6.10")
 	runtime("org.aspectj:aspectjrt:1.6.10")
-	aspects("com.altarasystems.orm:autosequence:0.1-SNAPSHOT")
+	aspects("com.altarasystems.orm:autosequence:1.0")
 	aspects("org.springframework:org.springframework.aspects:${SPRING_VERSION}")
 }
 
@@ -73,8 +73,8 @@ eclipseProject {
 /**
  * Modify any Eclipse classpath entries that are also in the "aspects" or "ajInpath" configuration
  * to include attributes that the AspectJ Eclipse plugin will use to indicate that these JARs include
- * aspects that should be woven into the build. This allows unit tests that rely on 
- * AspectJ woven code to be executed within the Eclipse environment correctly.
+ * aspects that should be woven into the build. This allows unit tests that execute AspectJ woven 
+ * code to behave correctly within the Eclipse environment.
  */
 eclipseClasspath {
 	whenConfigured { classpath ->
