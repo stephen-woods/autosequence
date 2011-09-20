@@ -29,6 +29,7 @@ public class EntityIdSetterService
 		if (idSetterMethod != null)
 		{
 			// We know what the setter method is already. Just call it.
+			invokeSetter(idSetterMethod, entity, id);
 			return;
 		}
 
@@ -37,6 +38,7 @@ public class EntityIdSetterService
 		{
 			// We know what the id field is already. Just assign a new value to
 			// it.
+			assignField(idField, entity, id);
 			return;
 		}
 
