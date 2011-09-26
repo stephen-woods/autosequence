@@ -15,15 +15,30 @@ dependencies {
 }
 
 task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
-	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
-	ant.iajc(source:sourceCompatibility,
-			target:targetCompatibility,
-			destDir:sourceSets.main.classesDir.absolutePath,
-			classpath: configurations.compile.asPath,
-			aspectPath: configurations.aspects.asPath,
-			inpath: configurations.ajInpath.asPath,
+	// Output compiled class files into the test classes directory
+	def iajcDestDir = sourceSets.main.classesDir.absolutePath
+	
+	// Include the JARs in the testCompile configuration in the classpath used by the sources being compiled.
+	def iajcClasspath = configurations.compile.asPath
+	
+	// Weave any binary aspects found in the JARs in the aspects configuration.
+	def iajcAspectPath = configurations.aspects.asPath
+	
+	//Include the JARs in the ajInpath configuration in the inpath containing binary aspects and
+	// classes that weave and may be woven. An aspect on the inpath may itself be affected by
+	// aspects.
+	def iajcInpath = configurations.ajInpath.asPath
+	
+	ant.taskdef(resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	
+	ant.iajc(source: sourceCompatibility,
+			target: targetCompatibility,
+			destDir: iajcDestDir,
+			classpath: iajcClasspath,
+			aspectPath: iajcAspectPath,
+			inpath: iajcInpath,
 			debug: true,
-			Xlint: "ignore",
+			Xlint: 'ignore',
 			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
 				sourceroots {
 					sourceSets.main.java.srcDirs.each{
@@ -34,24 +49,39 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 }
 
 task compileTestJava(dependsOn: JavaPlugin.COMPILE_JAVA_TASK_NAME, overwrite: true) << {
+	// Output compiled class files into the test classes directory
+	def iajcDestDir = sourceSets.test.classesDir.absolutePath
+	
+	// Include the JARs in the testCompile configuration and the main classes directory in the
+	// classpath used by the sources being compiled.
 	def iajcClasspath = ant.path {
 		pathelement( location: configurations.testCompile.asPath)
 		pathelement( location: sourceSets.main.classesDir.absolutePath)
 	}
+	
+	// Weave any binary aspects found in the JARs in the aspects configuration and those found
+	// in the main classes directory.
 	def iajcAspectPath = ant.path {
 		pathelement( location: configurations.aspects.asPath)
 		pathelement( location: sourceSets.main.classesDir.absolutePath)
 	}
-	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
-	ant.iajc(source:sourceCompatibility,
-			target:targetCompatibility,
-			destDir:sourceSets.test.classesDir.absolutePath,
+	
+	// Include the JARs in the ajInpath configuration in the inpath containing binary aspects and
+	// classes that weave and may be woven. An aspect on the inpath may itself be affected by
+	// aspects.
+	def iajcInpath = configurations.ajInpath.asPath
+	
+	ant.taskdef(resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
+	
+	ant.iajc(source: sourceCompatibility,
+			target: targetCompatibility,
+			destDir: iajcDestDir,
 			classpath: iajcClasspath,
 			aspectPath: iajcAspectPath,
-			inpath: configurations.ajInpath.asPath,
+			inpath: iajcInpath,
 			debug: true,
-			Xlint: "ignore",
-			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
+			Xlint: 'ignore',
+			sourceRootCopyFilter: '**/.svn/*,**/*.java,**/*.aj') {
 				sourceroots {
 					sourceSets.test.java.srcDirs.each{
 						pathelement(location:it.absolutePath)
@@ -59,8 +89,6 @@ task compileTestJava(dependsOn: JavaPlugin.COMPILE_JAVA_TASK_NAME, overwrite: tr
 				}
 			}
 }
-
-
 
 eclipseProject {
 	buildCommand ('org.eclipse.ajdt.core.ajbuilder')

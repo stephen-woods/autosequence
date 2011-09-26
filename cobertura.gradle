@@ -36,6 +36,8 @@ test.doFirst  {
 
 
 test {
+	// Define a system property that will be used by instrumented files in order to find
+	// the cobertura.ser file.
 	systemProperties["net.sourceforge.cobertura.datafile"] = cobSerFile.toString()
 }
 
