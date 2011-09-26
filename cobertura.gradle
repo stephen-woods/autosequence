@@ -1,0 +1,61 @@
+apply plugin: 'java'
+
+
+def cobSerFile="${project.buildDir}/cobertura.ser"
+def mainClassesDir = "${sourceSets.main.classesDir}"
+def backupClassesDir = "${sourceSets.main.classesDir}-backup"
+
+
+dependencies {
+	testRuntime("net.sourceforge.cobertura:cobertura:1.9.4")
+	testRuntime("junit:junit:4.8.2")
+}
+
+test.doFirst  {
+	ant {
+		// Delete data file for cobertura, otherwise coverage would be added
+		delete(file:cobSerFile, failonerror:false)
+		
+		// Delete copy of original classes
+		delete(dir: backupClassesDir, failonerror:false)
+		
+		// Import cobertura task, so it is available in the script
+		taskdef(resource:'tasks.properties', classpath: configurations.testRuntime.asPath)
+		
+		// Create copy (backup) of original class files
+		copy(todir: backupClassesDir) {
+			fileset(dir: mainClassesDir)
+		}
+		
+		// instrument the relevant classes in-place
+		'cobertura-instrument'(datafile:cobSerFile) {
+			fileset(dir: mainClassesDir, includes:"**/*.class", excludes:"**/*Test.class")
+		}
+	}
+}
+
+
+test {
+	systemProperties["net.sourceforge.cobertura.datafile"] = cobSerFile.toString()
+}
+
+test.doLast {
+	if (new File(backupClassesDir).exists()) {
+		// Replace instrumented classes with backup copy again
+		ant {
+			delete(file: mainClassesDir)
+			move(file: backupClassesDir, tofile: mainClassesDir)
+		}
+		// Create cobertura reports
+		ant.'cobertura-report'(destdir:"${project.buildDirName}/test-results", format:'html', datafile:cobSerFile) {
+			sourceSets.main.allSource.getSrcDirs().each { srcdir ->
+				if (srcdir.exists())
+					fileset(dir: srcdir)
+			}	
+		}
+	}
+}
+
+
+
+

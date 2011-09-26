@@ -25,21 +25,21 @@ public class AutoSequenceAspectTest
 		SampleEntity entity = new SampleEntity();
 		assertFalse(entity.getId() == 0);
 	}
-	
+
+
 	@AutoSequenceWithinCode
 	@Test
 	public void testWithinCodeMultipleTimes()
 	{
 		SampleEntity entity = new SampleEntity();
 		assertFalse(entity.getId() == 0);
-		
+
 		entity = new SampleEntity();
 		assertFalse(entity.getId() == 0);
-		
+
 		entity = new SampleEntity();
 		assertFalse(entity.getId() == 0);
 	}
-
 
 
 	@Test

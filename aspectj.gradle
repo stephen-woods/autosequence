@@ -33,27 +33,34 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 			}
 }
 
-task compileTestJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: true) << {
+task compileTestJava(dependsOn: JavaPlugin.COMPILE_JAVA_TASK_NAME, overwrite: true) << {
+	def iajcClasspath = ant.path {
+		pathelement( location: configurations.testCompile.asPath)
+		pathelement( location: sourceSets.main.classesDir.absolutePath)
+	}
+	def iajcAspectPath = ant.path {
+		pathelement( location: configurations.aspects.asPath)
+		pathelement( location: sourceSets.main.classesDir.absolutePath)
+	}
 	ant.taskdef( resource:"org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties", classpath: configurations.ajc.asPath)
 	ant.iajc(source:sourceCompatibility,
 			target:targetCompatibility,
 			destDir:sourceSets.test.classesDir.absolutePath,
-			classpath: configurations.testCompile.asPath,
-			aspectPath: configurations.aspects.asPath,
+			classpath: iajcClasspath,
+			aspectPath: iajcAspectPath,
 			inpath: configurations.ajInpath.asPath,
 			debug: true,
 			Xlint: "ignore",
 			sourceRootCopyFilter:"**/.svn/*,**/*.java,**/*.aj") {
 				sourceroots {
-					sourceSets.main.java.srcDirs.each{
-						pathelement(location:it.absolutePath)
-					}
 					sourceSets.test.java.srcDirs.each{
 						pathelement(location:it.absolutePath)
 					}
 				}
 			}
 }
+
+
 
 eclipseProject {
 	buildCommand ('org.eclipse.ajdt.core.ajbuilder')

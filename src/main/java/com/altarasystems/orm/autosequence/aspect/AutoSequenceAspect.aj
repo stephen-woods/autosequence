@@ -8,12 +8,9 @@ import com.altarasystems.orm.autosequence.AutoSequenceFactory;
 
 public aspect AutoSequenceAspect
 {
-	@Autowired
-	AutoSequenceFactory autoSequenceFactory;
-
-	@Autowired
-	EntityIdSetterService entityIdSetterService;
-
+	private AutoSequenceFactory autoSequenceFactory;
+	
+	private EntityIdSetterService entityIdSetterService;
 
 	after() returning (Object entity): call((@AutoSequence+ *).new(..)) && withincode(@AutoSequenceWithinCode * *(..)) {
 
@@ -24,11 +21,13 @@ public aspect AutoSequenceAspect
 		entityIdSetterService.setId(entity, id);
 	}
 	
+	@Autowired
 	public void setAutoSequenceFactory(AutoSequenceFactory autoSequenceFactory)
 	{
 		this.autoSequenceFactory = autoSequenceFactory;
 	}
 	
+	@Autowired
 	public void setEntityIdSetterService(EntityIdSetterService entityIdSetterService)
 	{
 		this.entityIdSetterService = entityIdSetterService;

@@ -2,6 +2,7 @@ apply plugin: 'eclipse'
 apply plugin: 'java'
 apply from: 'upload.gradle'
 apply from: 'aspectj.gradle'
+apply from: 'cobertura.gradle'
 
 artifactId = 'autosequence'
 group = 'com.altarasystems.orm'
