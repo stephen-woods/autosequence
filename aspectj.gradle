@@ -2,8 +2,8 @@ apply plugin: 'eclipse'
 
 configurations {
 	ajc
-	aspects
-	ajInpath
+	aspects {transitive = false}
+	ajInpath {transitive = false}
 }
 
 dependencies {
@@ -24,7 +24,7 @@ task compileJava(dependsOn: JavaPlugin.PROCESS_RESOURCES_TASK_NAME, overwrite: t
 	// Weave any binary aspects found in the JARs in the aspects configuration.
 	def iajcAspectPath = configurations.aspects.asPath
 	
-	//Include the JARs in the ajInpath configuration in the inpath containing binary aspects and
+	// Include the JARs in the ajInpath configuration in the inpath containing binary aspects and
 	// classes that weave and may be woven. An aspect on the inpath may itself be affected by
 	// aspects.
 	def iajcInpath = configurations.ajInpath.asPath
@@ -90,6 +90,10 @@ task compileTestJava(dependsOn: JavaPlugin.COMPILE_JAVA_TASK_NAME, overwrite: tr
 			}
 }
 
+
+/**
+ * Add the AspectJ builder and supporting natures to the Eclipse project. 
+ */
 eclipseProject {
 	buildCommand ('org.eclipse.ajdt.core.ajbuilder')
 	natures('org.eclipse.ajdt.core.ajnature')
@@ -97,6 +101,28 @@ eclipseProject {
 }
 
 
-
-
-
+/**
+* Modify any Eclipse classpath entries that are also in the "aspects" or "ajInpath" configuration
+* to include attributes that the AspectJ Eclipse plugin will use to indicate that these JARs include
+* aspects that should be woven into the build. This allows unit tests that rely on
+* AspectJ woven code to be executed within the Eclipse environment correctly.
+*/
+eclipseClasspath {
+   whenConfigured { classpath ->
+	   
+	   classpath.entries.each {entry ->
+		   configurations.aspects.each {aspectFile ->
+			   if (entry.path == aspectFile.getPath())
+			   {
+				   entry.entryAttributes['org.eclipse.ajdt.aspectpath'] = 'org.eclipse.ajdt.aspectpath'
+			   }
+		   }
+		   configurations.ajInpath.each {aspectFile ->
+			   if (entry.path == aspectFile.getPath())
+			   {
+				   entry.entryAttributes['org.eclipse.ajdt.inpath'] = 'org.eclipse.ajdt.inpath'
+			   }
+		   }
+	   }
+   }
+}
